@@ -4,9 +4,14 @@ from docx import Document
 import xlrd
 import os
 import subprocess
+import argparse
 
 class HouseKeeping:
     def __init__(self, feedback_doc_name, marking_sheet_name, marker_name):
+        print ("Feedback template: " + feedback_doc_name)
+        print ("Marking sheet: " + marking_sheet_name)
+        print ("Folder to check in: " + marker_name)
+
         self.feedback_doc_name = feedback_doc_name
         self.marker_name = marker_name
         #load student feedback form as a template
@@ -14,12 +19,14 @@ class HouseKeeping:
         #load my marking sheet 'PT' from workbook
         self.marking_sheet = xlrd.open_workbook(marking_sheet_name).sheet_by_name(marker_name)
 
+    #do things
+    def go(self):
         #username to firstname lastname map/dictionary
         self.name_map = {}
         self.construct_name_map()
         self.create_new_feedback_document()
 
-    #probably won't work for Windows
+		#probably won't work for Windows
     def unzip_submission(self, student_dir):
         #form unzip command
         cmd = 'unzip -d ' + student_dir + '/ ' + student_dir + '/*.zip'
@@ -35,7 +42,7 @@ class HouseKeeping:
             student_dir_name = os.path.relpath(student_dir, marker_directory)
 
             #print student_dir
-            if student_dir_name is not '.':
+            if (student_dir_name is not '.') and (student_dir_name in self.name_map):
                 student_name = self.name_map[student_dir_name][0] + ' ' + \
                                self.name_map[student_dir_name][1]
                 self.write_student_name_to_document(student_dir, student_dir_name, student_name)
@@ -48,6 +55,8 @@ class HouseKeeping:
         #default cell for student's firstname lastname
         filename = self.feedback_doc_name.replace('username', student_dir_name)
         self.feeback_document.tables[0].cell(1,0).text = student_name
+        self.feeback_document.tables[0].cell(1,1).text = student_dir_name
+        self.feeback_document.tables[0].cell(1,2).text = self.marker_name
         self.feeback_document.save(student_dir+'/'+filename)
         #print student_dir+'/'+filename
 
@@ -67,4 +76,12 @@ class HouseKeeping:
                 is_constructing_name_map = True
 
 
-hk = HouseKeeping('feedback_username_task2.docx','4001COMP Marking 2014-15 CW1-T2.xlsx','PF')
+parser = argparse.ArgumentParser(description='Housekeeping for 4001COMP marking.')
+parser.add_argument('task', metavar='TASK', type=str, help='Task number (e.g. 1)')
+parser.add_argument('initials', metavar='INITIALS', type=str, help='Marker initials (e.g. PH)')
+args = parser.parse_args()
+
+hk = HouseKeeping('feedback_username_task' + args.task + '.docx','4001COMP Marking 2014-15 CW1-T' + args.task + '.xlsx',args.initials)
+hk.go()
+
+
