@@ -11,9 +11,11 @@ All the submissions should be in a folder named by the marker's initials. The ho
 
 Open a console in this folder and run:
 
+``
 housekeeping.py <task> <initials>
+``
 
-Where <task> is the task number (e.g. 1, 2, etc.) and <initials> is the marker's initials (e.g. PH).
+Where `<task>` is the task number (e.g. 1, 2, etc.) and `<initials>` is the marker's initials (e.g. PH).
 
 ## Dependencies:
  1. xlrd; sudo pip install xlrd
